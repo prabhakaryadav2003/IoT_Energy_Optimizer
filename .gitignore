@@ -1,1 +1,88 @@
-/.venv/
+# ------------------ Python ------------------
+
+**pycache**/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+
+.venv/
+venv/
+env/
+
+# ------------------ Logs ------------------
+
+*.log
+logs/
+
+# ------------------ OS files ------------------
+
+.DS_Store
+Thumbs.db
+
+# ------------------ IDE ------------------
+
+.vscode/
+.idea/
+
+# ------------------ Jupyter ------------------
+
+.ipynb_checkpoints/
+
+# ------------------ Build / Packaging ------------------
+
+build/
+dist/
+*.egg-info/
+
+# ------------------ Environment / Secrets ------------------
+
+.env
+.env.*
+*.env
+
+# ------------------ Model files (optional) ------------------
+
+# Uncomment if models are large and downloaded separately
+
+# models/
+# *.tflite
+# *.pt
+# *.onnx
+
+# ------------------ Data / Outputs ------------------
+
+data/
+outputs/
+*.csv
+*.npy
+*.npz
+
+# ------------------ OpenCV / Camera temp ------------------
+
+*.avi
+*.mp4
+*.jpg
+*.png
+
+# ------------------ MQTT / Runtime temp ------------------
+
+tmp/
+cache/
+
+# ------------------ Raspberry Pi ------------------
+
+*.h264
+*.raw
+
+# ------------------ Coverage / Testing ------------------
+
+.coverage
+htmlcov/
+
+# ------------------ Misc ------------------
+
+*.bak
+*.swp

@@ -14,7 +14,7 @@ SLEEP_TIME = 0.02
 mqtt = MQTTClient(config.MQTT_BROKER)
 mqtt.connect()
 
-vision = OccupancySystem("models/yolov8n_saved_model/yolov8n_int8.tflite")
+vision = OccupancySystem("RPI/models/yolov8n_saved_model/yolov8n_int8.tflite")
 
 camera = Camera(320, 240)
 

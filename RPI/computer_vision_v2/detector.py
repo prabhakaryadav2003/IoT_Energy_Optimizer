@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 from utils import get_interpreter
-from preprocess import preprocess_frame
+from .preprocess import preprocess_frame
 
 PERSON_CLASS_ID = 0
 
