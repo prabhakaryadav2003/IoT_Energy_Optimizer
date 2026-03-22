@@ -1,24 +1,41 @@
 from mqtt.mqtt_client import MQTTClient
-from controllers.ac_controller import ACController
-from controllers.exhaust_controller import ExhaustController
-from controllers.environment_controller import EnvironmentController
-from occupancy.occupancy_controller import OccupancyController
-from sensors.environment_data import EnvironmentData
+from environment_system.device_manager import DeviceManager
+from environment_system.controller import EnvironmentController
+
+from occupancy import OccupancyModule
+from sensors import SensorModule
+from utils import EnvironmentData
+
 import config
+import time
+
+# ------------------ INIT ------------------
 
 mqtt = MQTTClient(config.MQTT_BROKER)
 
-ac = ACController(mqtt)
-exhaust = ExhaustController(mqtt)
-occupancy = OccupancyController()
+# Devices
+devices = DeviceManager(mqtt)
+devices.add_ac("ac1")
+devices.add_ac("ac2")
+devices.add_exhaust("exhaust")
 
-controller = EnvironmentController(ac, exhaust, occupancy)
+# Modules
+occupancy = OccupancyModule()
+sensor = SensorModule()
+
+# Controller
+controller = EnvironmentController(devices, occupancy)
+
+# Shared state
 people = 0
 
-def callback(topic, message):
+
+# ------------------ HANDLERS ------------------
+
+def handle_sensor(topic, message):
     global people
 
-    if topic == config.SEN55_TOPIC:
+    try:
         data = EnvironmentData(
             temperature=message["temperature"],
             humidity=message["humidity"],
@@ -26,18 +43,46 @@ def callback(topic, message):
             voc_index=message["voc"],
             pm2_5=message["pm2_5"]
         )
+    except KeyError:
+        print("[ERROR] Invalid sensor payload:", message)
+        return
 
-        controller.process(data, people)
+    # -------- Sensor processing --------
+    processed = sensor.update(data)
+    data = processed["data"]
 
-    elif topic == config.OCC_TOPIC:
-        people = message["payload"]
+    # -------- Control --------
+    controller.process(data, people)
 
 
-mqtt.set_message_callback(callback)
+def handle_occupancy(topic, message):
+    global people
+
+    try:
+        people = message.get("count", message.get("payload", 0))
+    except Exception:
+        people = 0
+
+    # Debug
+    print(f"[OCCUPANCY] People: {people}")
+
+
+# ------------------ MQTT SETUP ------------------
+
 mqtt.connect()
-mqtt.subscribe(config.SEN55_TOPIC)
-mqtt.subscribe(config.SCD30_TOPIC)
-mqtt.subscribe(config.OCC_TOPIC)
 
-while True:
-    pass
+mqtt.subscribe(config.SEN55_TOPIC, handle_sensor)
+mqtt.subscribe(config.OCC_TOPIC, handle_occupancy)
+mqtt.subscribe(config.SCD30_TOPIC, handle_sensor)
+
+
+# ------------------ MAIN LOOP ------------------
+
+try:
+    while True:
+        time.sleep(config.LOOP_DELAY)
+
+except KeyboardInterrupt:
+    print("Shutting down...")
+    occupancy.save()
+    mqtt.disconnect()

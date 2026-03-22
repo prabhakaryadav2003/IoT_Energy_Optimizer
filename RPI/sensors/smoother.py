@@ -1,13 +1,14 @@
-from utils.moving_average import MovingAverage
+from utils import MovingAverage
+
 
 class SensorSmoother:
 
-    def __init__(self):
-        self.temp = MovingAverage()
-        self.humidity = MovingAverage()
-        self.nox = MovingAverage()
-        self.voc = MovingAverage()
-        self.pm25 = MovingAverage()
+    def __init__(self, window_size=5):
+        self.temp = MovingAverage(window_size)
+        self.humidity = MovingAverage(window_size)
+        self.nox = MovingAverage(window_size)
+        self.voc = MovingAverage(window_size)
+        self.pm25 = MovingAverage(window_size)
 
     def smooth(self, data):
         data.temperature = self.temp.update(data.temperature)
